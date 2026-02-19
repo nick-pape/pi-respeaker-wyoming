@@ -15,7 +15,7 @@ Turn a Raspberry Pi Zero 2 WH + ReSpeaker 2-Mics Pi HAT (v1.2/1.3) into a Home A
 SSH into your Pi, then:
 
 ```bash
-git clone https://github.com/YOUR_USER/pi-respeaker-wyoming.git
+git clone https://github.com/nick-pape/pi-respeaker-wyoming.git
 cd pi-respeaker-wyoming
 
 # Edit config as needed
@@ -77,15 +77,26 @@ sudo systemctl status wyoming-satellite wyoming-openwakeword 2mic-leds
 
 ## Architecture
 
-```
-Pi Zero 2 WH                          Home Assistant Server
-┌─────────────────────┐               ┌──────────────────────┐
-│ ReSpeaker HAT       │               │ openWakeWord add-on  │
-│   ↓ audio           │   TCP:10700   │ Whisper STT          │
-│ wyoming-satellite ──┼───────────────┤ Conversation Agent   │
-│   ↓ events          │  (Wyoming     │ Piper TTS            │
-│ 2mic LED service    │   Protocol)   │                      │
-└─────────────────────┘               └──────────────────────┘
+```mermaid
+graph LR
+    subgraph Pi Zero 2 WH
+        HAT[ReSpeaker HAT]
+        SAT[wyoming-satellite]
+        LED[2mic LED service]
+        HAT -- audio --> SAT
+        SAT -- events --> LED
+    end
+
+    subgraph Home Assistant Server
+        OWW[openWakeWord add-on]
+        STT[Whisper STT]
+        CONV[Conversation Agent]
+        TTS[Piper TTS]
+        OWW --> STT --> CONV --> TTS
+    end
+
+    SAT -- "TCP:10700 · Wyoming Protocol" --> OWW
+    TTS -- audio response --> SAT
 ```
 
 ## Note
